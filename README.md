@@ -34,8 +34,6 @@ commands:
 ```
 
 ## Package installation
-After each installation the current terminal needs to be reset. To avoid this, one may execute (on linux) `source ~/.bcp/base` which reloads the package commands.
-
 To install a local bcp-configured project:
 
 `bcp install <PROJECT-PATH>`
@@ -50,6 +48,20 @@ Where `<GIT-REPO-URL>` is the URL of the desired bcp-configured git repository t
 
 `bcp install https://github.com/ctrekker/ExampleBCP.git`
 
+## Package uninstallation
+To uninstall a package use the following command:
+
+`bcp uninstall <PACKAGE-NAME>`
+
+This package name is either the name of the git repository installed from or the name of the directory it was installed in. For example, an installation path of `/home/ctrekker/Programming/ExampleBCP` would have a package name of `ExampleBCP`.
+
+## Package updating
+As of now, package updating is simply a reinstallation as there is no version number implementation yet. The syntax is nearly identical to `bcp uninstall`.
+
+`bcp update <PACKAGE-NAME>`
+
 ## Other commands
 ### `bcp read_registry`
 Used for debugging the package registry file. Prints the registry in a more human-readable format. For advanced users only.
+### `bcp installation_source <PACKAGE-NAME>`
+Yields the installation source (either git repository url or a filesystem path) of a provided package.
