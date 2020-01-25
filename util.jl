@@ -74,6 +74,27 @@ function registry_add_package(root)
     save_registry(registry);
     println("Installed package \"$package_name\"")
 end
+function registry_install_package(package_name)
+    if is_url(package_name)
+        repo_home = "$(homedir())/.bcp/repositories"
+        before = readdir(repo_home)
+
+        pre_pwd = pwd()
+        cd("$(homedir())/.bcp/repositories")
+        run(`git clone $package_name`)
+
+        after = readdir(repo_home)
+        filter!(x->!(x in before), after)
+        repo_name = after[1]
+        println()
+
+        cd(repo_name)
+        registry_add_package(pwd())
+    else
+        cd(package_name)
+        registry_add_package(pwd())
+    end
+end
 function registry_remove_package(package_name)
     println("Uninstalling package \"$package_name\"...")
     
@@ -101,4 +122,20 @@ end
 function registry_get_packages()
     registry = get_registry()
     return registry["packages"]
+end
+
+function get_installation_source(package_name)
+    registry = get_registry()
+    package_data = registry["packages"][package_name]
+    if package_data["linked"] === 1
+        return package_data["root"]
+    else
+        pre_pwd = pwd()
+        cd(package_data["root"])
+        git_url = read(`git remote get-url --all origin`, String)
+        git_url = git_url[1:length(git_url)-1]
+        cd(pre_pwd)
+
+        return git_url
+    end
 end

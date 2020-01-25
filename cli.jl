@@ -11,27 +11,13 @@ if length(ARGS) > 1
 end
 
 if subcommand === "install"
-    if is_url(option)
-        repo_home = "$(homedir())/.bcp/repositories"
-        before = readdir(repo_home)
-
-        pre_pwd = pwd()
-        cd("$(homedir())/.bcp/repositories")
-        run(`git clone $option`)
-
-        after = readdir(repo_home)
-        filter!(x->!(x in before), after)
-        repo_name = after[1]
-        println()
-
-        cd(repo_name)
-        registry_add_package(pwd())
-    else
-        cd(option)
-        registry_add_package(pwd())
-    end
+    registry_install_package(option)
 elseif subcommand === "uninstall"
     registry_remove_package(option)
+elseif subcommand === "update"
+    installation_source = get_installation_source(option)
+    registry_remove_package(option)
+    registry_install_package(installation_source)
 elseif subcommand === "list"
     for (package_name, package_data) ∈ registry_get_packages()
         println(package_name)
@@ -39,6 +25,8 @@ elseif subcommand === "list"
             println("\t$command_name")
         end
     end
+elseif subcommand === "installation_source"
+    println(get_installation_source(option))
 elseif subcommand === "read_registry"
     include("read_registry.jl")
 end
