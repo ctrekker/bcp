@@ -32,18 +32,22 @@ function system_add_command(command, root)
     cd_command = ""
     if haskey(command, "directory")
         working_dir = command["directory"]
+        cd(working_dir)
         abs_working_dir = pwd()
-        cd_command = "cd $abs_working_dir && "
-        cd("$init_pwd")
+        cd_command = "cd $abs_working_dir\n"
         cd("$root")
     end
 
     fullpath = abspath("$filename")
     
-    alias_str_command = "alias $name='$(cd_command)$executor $fullpath'\n"
+    alias_str_command = "$executor $fullpath \$@\n"
     io = open("$(homedir())/.bcp/commands/$name", "a")
+    if cd_command !== ""
+        write(io, cd_command)
+    end
     write(io, alias_str_command)
     close(io);
+    run(`chmod +x $(homedir())/.bcp/commands/$name`)
 end
 function registry_add_package(root)
     package_name = basename(abspath(root))

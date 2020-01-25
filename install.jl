@@ -8,16 +8,16 @@ if !isdir(home_path)
     mkdir("$home_path/repositories")
 end
 
-io = open("$(homedir())/.bashrc", "a")
-write(io, "\n# bcp alias script inclusion\n")
-write(io, "source ~/.bcp/base")
+io = open("$(homedir())/.profile", "a")
+write(io, "\n# bcp script inclusion\n")
+write(io, "PATH=\"\$HOME/.bcp/commands:\$PATH\"")
 close(io);
 
-io = open("$(homedir())/.bcp/base", "a")
+io = open("$(homedir())/.bcp/commands/bcp", "a")
 cli_script_path = "$(pwd())/cli.jl"
-write(io, "alias bcp='julia $cli_script_path'\n")
-write(io, "for FILE in ~/.bcp/commands/* ; do source \$FILE ; done\n")
+write(io, "julia $cli_script_path \$@\n")
 close(io);
+run(`chmod +x $(homedir())/.bcp/commands/bcp`)
 
 registry_path = "$(homedir())/.bcp/registry.jld"
 commands = Dict()
