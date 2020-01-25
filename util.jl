@@ -6,16 +6,22 @@ registry_path = "$(homedir())/.bcp/registry.jld"
 function get_config(path)
     return YAML.load(open("$path/config.yaml"))
 end
+function get_registry()
+    return JLD.load(registry_path)
+end
+function save_registry(registry)
+    JLD.save(registry_path, registry)
+end
 
 function registry_add_command(command_entry, package_name)
     i = "commands"
-    registry = JLD.load(registry_path)
+    registry = get_registry()
     if !haskey(registry["commands"], command_entry["name"])
         registry["commands"][command_entry["name"]] = package_name
     else
         return registry["commands"][command_entry["name"]]
     end
-    JLD.save(registry_path, registry)
+    save_registry(registry)
     return true
 end
 function system_add_command(command, root)
@@ -41,13 +47,13 @@ function system_add_command(command, root)
 end
 function registry_add_package(root)
     package_name = basename(abspath(root))
-    registry = JLD.load(registry_path)
+    registry = get_registry()
     if haskey(registry["packages"], package_name)
         println("ERROR: Package \"$package_name\" already installed")
         return false
     end
     config = get_config(root)
-    println("Installing package \"$package_name\"")
+    println("Installing package \"$package_name\"...")
 
     commands = config["commands"]
     for command ∈ commands
@@ -65,5 +71,34 @@ function registry_add_package(root)
         "commands" => map(x->x["name"], commands),
         "linked" => !occursin(".bcp", root) ? 1 : 0
     )
-    JLD.save(registry_path, registry);
+    save_registry(registry);
+    println("Installed package \"$package_name\"")
+end
+function registry_remove_package(package_name)
+    println("Uninstalling package \"$package_name\"...")
+    
+    registry = get_registry()
+    package_data = registry["packages"][package_name]
+    for command_name ∈ package_data["commands"]
+        try
+            rm("$(homedir())/.bcp/commands/$command_name")
+        catch x
+            println(x)
+        end
+        delete!(registry["commands"], command_name)
+    end
+    if package_data["linked"] === 0
+        try
+            rm("$(homedir())/.bcp/repositories/$package_name", recursive=true)
+        catch x
+            println(x)
+        end
+    end
+    delete!(registry["packages"], package_name)
+    save_registry(registry)
+    println("Uninstalled package \"$package_name\"")
+end
+function registry_get_packages()
+    registry = get_registry()
+    return registry["packages"]
 end

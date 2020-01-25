@@ -30,6 +30,15 @@ if subcommand === "install"
         cd(option)
         registry_add_package(pwd())
     end
+elseif subcommand === "uninstall"
+    registry_remove_package(option)
+elseif subcommand === "list"
+    for (package_name, package_data) ∈ registry_get_packages()
+        println(package_name)
+        for command_name ∈ package_data["commands"]
+            println("\t$command_name")
+        end
+    end
 elseif subcommand === "read_registry"
     include("read_registry.jl")
 end
