@@ -10,10 +10,7 @@ if length(ARGS) > 1
     option = ARGS[2]
 end
 
-if subcommand === "clone"
-    clone = `git clone $option`
-    # run(clone)
-elseif subcommand === "install"
+if subcommand === "install"
     if is_url(option)
         repo_home = "$(homedir())/.bcp/repositories"
         before = readdir(repo_home)
